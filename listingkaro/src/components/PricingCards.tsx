@@ -4,7 +4,7 @@ import { CREDIT_PACKS } from "@/lib/mock";
 export function PricingCards() {
   return (
     <div className="grid gap-4 sm:grid-cols-3">
-      <article className="flex flex-col rounded-3xl border border-ink/10 bg-white p-6 shadow-[0_12px_40px_rgba(11,28,40,0.05)]">
+      <article className="flex flex-col rounded-lg border border-ink/10 bg-white p-6 shadow-[0_12px_40px_rgba(11,28,40,0.05)]">
         <p className="text-sm font-medium text-ink/50">Free</p>
         <p className="font-display mt-3 text-4xl font-medium">Rs 0</p>
         <p className="mt-3 flex-1 text-sm leading-6 text-ink/60">
@@ -22,7 +22,7 @@ export function PricingCards() {
       {CREDIT_PACKS.map((pack) => (
         <article
           key={pack.id}
-          className={`flex flex-col rounded-3xl p-6 ${
+          className={`flex flex-col rounded-lg p-6 ${
             pack.popular
               ? "bg-ink text-white shadow-xl"
               : "border border-ink/10 bg-white shadow-[0_12px_40px_rgba(11,28,40,0.05)]"

@@ -29,7 +29,7 @@ export function FaqAccordion() {
   const [open, setOpen] = useState<number | null>(0);
 
   return (
-    <div className="divide-y divide-ink/10 overflow-hidden rounded-3xl border border-ink/10 bg-[#f4f0e8]">
+    <div className="divide-y divide-ink/10 overflow-hidden rounded-lg border border-ink/10 bg-[#f4f0e8]">
       {FAQS.map((item, index) => {
         const isOpen = open === index;
         return (
