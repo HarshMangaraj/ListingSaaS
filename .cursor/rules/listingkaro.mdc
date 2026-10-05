@@ -1,0 +1,46 @@
+---
+alwaysApply: true
+---
+# ListingKaro: project rules
+
+Product: AI tool for Indian online sellers (Meesho, Amazon, Flipkart). Seller signs in with Google, uploads a product photo + optional Hindi/Hinglish/Odia text, gets a ready-to-paste English listing. Credit packs paid via Razorpay. Budget Rs 0.
+
+Stack (use exactly this): Next.js App Router + TypeScript + Tailwind, Supabase (Google OAuth + Postgres), Google Gemini API (server-side only), Razorpay (Orders API + Checkout.js + webhook), Zod.
+
+Rules:
+- The developer is a beginner. Keep code simple, readable, with short comments explaining the WHY.
+- Never hardcode secrets. All secrets in env vars (see .env.example). Never expose GEMINI_API_KEY, SUPABASE_SERVICE_ROLE_KEY, RAZORPAY_KEY_SECRET or RAZORPAY_WEBHOOK_SECRET to the client. Only NEXT_PUBLIC_* may reach the browser.
+- Gemini is called ONLY from server route handlers. Before writing Gemini code, check the CURRENT official docs (ai.google.dev) for the recommended Gemini Flash model name and the @google/genai SDK usage. Do not guess model names. Put the model name in one constant.
+- Validate every API input and the Gemini output with Zod.
+- Credits: deduct atomically via a Postgres function (single UPDATE ... WHERE credits > 0 RETURNING). Refund if Gemini fails.
+- Payments: idempotent. razorpay_payment_id is UNIQUE; one SQL function adds credits; both /verify and /webhook call it; the same payment must never add credits twice.
+- Listing honesty rule in the prompt: only state what is visible in the photo or given by the seller. If unsure, write "[confirm: fabric]" style placeholders. No false claims.
+- Error messages: simple Hinglish-friendly English, e.g. "Aapke credits khatam ho gaye. Please buy a pack."
+- After each phase: list the files created/changed, how to run/test it, and what I (the human) must do manually. Then STOP and wait. Do not start the next phase.
+- Do not install extra libraries unless asked.
+
+PHASE 1: Build the entire frontend using MOCK data only, and make it deploy-ready for Vercel today. No Supabase, Gemini or Razorpay calls yet.
+
+Build:
+1. Landing page (src/app/page.tsx): one-line promise, hero, demo section, before/after example (weak seller title vs polished listing), pricing cards (Free: 3 listings on signup; Rs 99 = 20 listings; Rs 299 = 100 listings), FAQ accordion, footer with links to /privacy /terms /refund /contact. Mobile-first, clean Tailwind, Indian-seller friendly tone.
+2. /login page with a "Continue with Google" button (placeholder handler for now, just links to /app).
+3. /app dashboard:
+   - Credits badge in header (mock: 3) and a "Buy credits" button opening a modal with the two packs (button shows "Payments coming soon").
+   - Uploader: choose image (jpg/png/webp only, max 5 MB check), preview, compress in the browser with canvas to max 1000px longest side, JPEG quality ~0.8 (reusable function in src/lib/compressImage.ts).
+   - Optional textarea for Hindi/Hinglish/Odia notes.
+   - Generate button with loading state (fake 2s delay, returns a sample listing).
+   - Results card: title with character counter (max 100), description, 10 keyword chips, 5 bullets, suggested category. Copy button per section, "Copy all", and "Download CSV" (built in the browser, quotes escaped properly).
+   - History list of past listings (mock array in state), click to view.
+   - Friendly error banner component with variants: rate limit, bad image, no credits, payment failed. Hinglish-friendly English.
+   - A visible yellow "Demo mode: sample results only" banner at the top of /app.
+4. Static pages /privacy, /terms, /refund, /contact with sensible content for an Indian AI listing tool: mention Google Gemini processes uploaded images, Razorpay processes payments, Google sign-in, refund policy (credit refunded for failed generations; purchased packs refundable only for payment errors or unused credits within 7 days), and read the contact email from a constant in src/lib/site.ts (placeholder: support@example.com).
+5. Zod schema in src/lib/schema.ts: title (max 100), description, keywords (array of 10), bullets (array of 5), suggestedCategory. Use its inferred type in the UI.
+6. Deploy-readiness:
+   - src/app/layout.tsx: proper metadata (title, description, openGraph), lang="en", viewport.
+   - Add src/app/icon.png placeholder or an emoji-based favicon, and src/app/robots.ts that sets noindex for /app and /login.
+   - Add a src/app/not-found.tsx with a friendly 404.
+   - Run `npm run build` and `npm run lint` and fix ALL errors and warnings. The build must pass with zero errors.
+   - Do not use any env vars in this phase.
+
+Components go in src/components. When done, list files created, how to test locally, and stop.
+
